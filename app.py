@@ -138,9 +138,9 @@ def get_due_date():
     })
 
     else:
-    return jsonify({
-        "message": "Unknown request type."
-    })
+        return jsonify({
+            "message": "Unknown request type."
+        })
 
     # except Exception as e:
     #     logging.exception("Webhook error:")
