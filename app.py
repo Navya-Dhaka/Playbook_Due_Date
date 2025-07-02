@@ -46,7 +46,7 @@ def authenticate():
         "received_ID_number": user_id,
         "received_name": user_name,
         "authenticated": True,
-        "message": "User authenticated successfully."
+        "message": "User authenticated successfully.",
         "sessionInfo": {
             "parameters": {
                 "id_number": user_id,
