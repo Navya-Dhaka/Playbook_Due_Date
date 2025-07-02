@@ -37,7 +37,7 @@ def authenticate():
     if user_data is None:
         return jsonify({
             "user_found": False,
-            "authenticated" = False,
+            "authenticated": = False,
             "message": "We couldn't find a matching record for the provided ID and name. Please re-enter your details."
         })
 
