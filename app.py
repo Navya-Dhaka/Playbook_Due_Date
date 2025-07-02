@@ -56,7 +56,7 @@ def authenticate():
     })
 
 @app.route("/due_date", methods=["POST"])
-def get_due_date():
+def due_date():
     req = request.get_json()
     user_id, user_name = extract_session_user(req)
     user_data = find_user(user_id, user_name)
@@ -86,7 +86,7 @@ def get_due_date():
         })
 
 @app.route("/amount_due", methods=["POST"])
-def get_due_date():
+def amount_due():
     req = request.get_json()
     user_id, user_name = extract_session_user(req)
     user_data = find_user(user_id, user_name)
@@ -101,8 +101,8 @@ def get_due_date():
         "message": message
     })
 
-@app.route("/amount_due", methods=["POST"])
-def get_due_date():
+@app.route("/negative_reason", methods=["POST"])
+def negative_reason():
     req = request.get_json()
     user_id, user_name = extract_session_user(req)
     user_data = find_user(user_id, user_name)
@@ -121,8 +121,8 @@ def get_due_date():
         "message": message
     })
 
-@app.route("/amount_due", methods=["POST"])
-def get_due_date():
+@app.route("/plan_type", methods=["POST"])
+def plan_type():
     req = request.get_json()
     user_id, user_name = extract_session_user(req)
     user_data = find_user(user_id, user_name)
