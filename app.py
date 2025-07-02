@@ -22,10 +22,21 @@ def webhook():
         req = request.get_json()
         logging.debug(f"Received request JSON: {req}")
 
-        tag = req.get('fulfillmentInfo', {}).get('tag')
+        tag = req.get('fulfillmentInfo', {}).get('tag') or req.get('tag')
         params = req.get('sessionInfo', {}).get('parameters', {})
+
+        # Fallback to flat format if sessionInfo is missing
+        if not params:
+            params = req
+        
         user_id = params.get('id_number')
         user_name = params.get('name')
+
+        
+        # tag = req.get('fulfillmentInfo', {}).get('tag')
+        # params = req.get('sessionInfo', {}).get('parameters', {})
+        # user_id = params.get('id_number')
+        # user_name = params.get('name')
 
         logging.debug(f"Tag: {tag}, ID: {user_id}, Name: {user_name}")
 
