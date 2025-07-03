@@ -16,21 +16,15 @@ def find_user(user_id, user_name):
     user_data = df[(df['ID'] == user_id) & (df['Name'].str.lower() == user_name.lower())]
     return user_data if not user_data.empty else None
 
-def get_user_from_session(req_json):
-    session_info = req_json.get("sessionInfo", {})
-    params = session_info.get("parameters", {})
-    user_id = params.get("id_number")
-    user_name = params.get("name")
+def extract_user_from_request(req_json):
+    user_id = req_json.get("id_number")
+    user_name = req_json.get("name")
     return user_id, user_name
 
 @app.route("/authenticate", methods=["POST"])
 def authenticate():
     req = request.get_json()
-    logging.debug(f"Received request JSON: {req}")
-    user_id = req.get('id_number')
-    user_name = req.get('name')
-
-    logging.debug(f"Tag: {tag}, ID: {user_id}, Name: {user_name}")
+    user_id, user_name = extract_user_from_request(req)
 
     user_data = find_user(user_id, user_name)
 
@@ -46,54 +40,48 @@ def authenticate():
         "received_ID_number": user_id,
         "received_name": user_name,
         "authenticated": True,
-        "message": "User authenticated successfully.",
-        "sessionInfo": {
-            "parameters": {
-                "id_number": user_id,
-                "name": user_name
-            }
-        }
+        "message": "User authenticated successfully."
     })
 
 @app.route("/due_date", methods=["POST"])
 def due_date():
     req = request.get_json()
-    user_id, user_name = extract_session_user(req)
+    user_id, user_name = extract_user_from_request(req)
     user_data = find_user(user_id, user_name)
 
-    if user_data is None or user_data.empty:
+    if user_data is None:
         return jsonify({"message": "User not authenticated."})
-        
+
     due_date_str = user_data['Due Date'].values[0]
     due_date = datetime.strptime(due_date_str, "%m-%d-%Y").date()
     today = datetime.today().date()
-    
+
     amount_due = user_data['Amount'].values[0]
     if due_date < today:
         message = "Your due date has passed."
         if amount_due > 0:
             message += " Along with your due amount, you have to pay extra 10 dollars as late fees."
-        elif due_date == today:
-            message = "Your due date is today."
-        else:
-            message = "Your due date is in the future."
+    elif due_date == today:
+        message = "Your due date is today."
+    else:
+        message = "Your due date is in the future."
 
-        message += f" It is {due_date}."
+    message += f" It is {due_date}."
 
-        return jsonify({
-            "due_date": str(due_date),
-            "message": message
-        })
+    return jsonify({
+        "due_date": str(due_date),
+        "message": message
+    })
 
 @app.route("/amount_due", methods=["POST"])
 def amount_due():
     req = request.get_json()
-    user_id, user_name = extract_session_user(req)
+    user_id, user_name = extract_user_from_request(req)
     user_data = find_user(user_id, user_name)
 
-    if user_data is None or user_data.empty:
+    if user_data is None:
         return jsonify({"message": "User not authenticated."})
-        
+
     amount_due = user_data['Amount'].values[0]
     message = f"The amount you have to pay is {amount_due}."
     return jsonify({
@@ -104,12 +92,12 @@ def amount_due():
 @app.route("/negative_reason", methods=["POST"])
 def negative_reason():
     req = request.get_json()
-    user_id, user_name = extract_session_user(req)
+    user_id, user_name = extract_user_from_request(req)
     user_data = find_user(user_id, user_name)
 
-    if user_data is None or user_data.empty:
+    if user_data is None:
         return jsonify({"message": "User not authenticated."})
-        
+
     amount_due = user_data['Amount'].values[0]
     why_negative = user_data['Why Negative'].values[0]
     if amount_due < 0 and pd.notna(why_negative) and str(why_negative).strip():
@@ -124,12 +112,12 @@ def negative_reason():
 @app.route("/plan_type", methods=["POST"])
 def plan_type():
     req = request.get_json()
-    user_id, user_name = extract_session_user(req)
+    user_id, user_name = extract_user_from_request(req)
     user_data = find_user(user_id, user_name)
 
-    if user_data is None or user_data.empty:
+    if user_data is None:
         return jsonify({"message": "User not authenticated."})
-        
+
     plan_type = user_data['Plan'].values[0]
     message = f"Your plan type is {plan_type}."
     return jsonify({
@@ -137,23 +125,9 @@ def plan_type():
         "message": message
     })
 
-    # else:
-    #     return jsonify({
-    #         "message": "Unknown request type."
-    #     })
-
-    # except Exception as e:
-    #     logging.exception("Webhook error:")
-    #     return jsonify({
-    #         "message": "An internal error occurred. Please try again later."
-    #     }), 500
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
-
-
 
 
 
