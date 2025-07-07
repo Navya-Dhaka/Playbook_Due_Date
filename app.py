@@ -46,7 +46,9 @@ def authenticate():
 @app.route("/due_date", methods=["POST"])
 def due_date():
     req = request.get_json()
+    logging.debug(f"Received request body: {req}")
     user_id, user_name = extract_user_from_request(req)
+    logging.debug(f"Extracted user_id: {user_id}, user_name: {user_name}")
     user_data = find_user(user_id, user_name)
 
     if user_data is None:
